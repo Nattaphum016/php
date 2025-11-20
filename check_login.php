@@ -15,6 +15,11 @@ if (empty($username) || empty($password)) {
 // ค้นหาข้อมูลจากฐานข้อมูล
 $sql = "SELECT * FROM member WHERE username = ?";
 $stmt = mysqli_prepare($con, $sql);
+if (!$stmt) {
+    // prepare failed
+    echo "<script>alert('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล'); window.history.back();</script>";
+    exit();
+}
 mysqli_stmt_bind_param($stmt, "s", $username);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
@@ -22,8 +27,7 @@ $result = mysqli_stmt_get_result($stmt);
 // ตรวจสอบผลลัพธ์
 if ($row = mysqli_fetch_assoc($result)) {
 
-    // ✅ ตรวจสอบรหัสผ่าน: ถ้าใช้ password_hash ตอนสมัคร จะใช้ password_verify()
-    // ถ้ายังเก็บแบบ plain text (เช่น admin/admin) ให้ใช้ == แทน
+    // ตรวจสอบรหัสผ่าน
     if (password_verify($password, $row['password']) || $password == $row['password']) {
 
         // ตั้งค่า session
@@ -32,16 +36,24 @@ if ($row = mysqli_fetch_assoc($result)) {
         $_SESSION['username'] = $row['username'];
         $_SESSION['email'] = $row['email'];
 
-        echo "<script>
-                alert('เข้าสู่ระบบสำเร็จ');
-                window.location.href = 'profile.php';
-              </script>";
-        exit();
+        if ($row['position'] === 'Admin') {
+            header('Location: admin/index.php');
+            exit();
+        } elseif ($row['position'] === 'User') {
+            header('Location: profile.php');
+            exit();
+        } else {
+            header('Location: profile.php');
+            exit();
+        }
+
     } else {
         echo "<script>alert('รหัสผ่านไม่ถูกต้อง'); window.history.back();</script>";
+        exit();
     }
 } else {
     echo "<script>alert('ไม่พบบัญชีผู้ใช้นี้ในระบบ'); window.history.back();</script>";
+    exit();
 }
 
 mysqli_stmt_close($stmt);

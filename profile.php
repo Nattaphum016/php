@@ -31,7 +31,7 @@ if (!isset($_SESSION['member_id'])) { // ✅ ชื่อต้องตรง�
       <!-- เมนูซ้าย -->
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active" href="#">Home</a>
+          <a class="nav-link active" href="register_form">สมัครสมาชิก</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Features</a>
